@@ -1,0 +1,33 @@
+---
+- hosts: web
+  name: configuration play
+  user: ubuntu
+
+  gather_facts: false
+  pre_tasks:
+    - name: Install python for Ansible
+      become: true
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: false
+    - setup: 
+
+  tasks:
+
+    - name: Install nginx
+      become: true
+      apt:
+        name: nginx
+        update_cache: true
+
+    - name: Create the DB
+      postgresql_db:
+        name: webapp
+        encoding: UTF-8
+
+    - name: Create the user
+    postgresql_user:
+      db: webapp
+      priv: ALL:SELECT,INSERT,UPDATE,DELETE,CONNECT
+      name: webappuser
+      password: secret
+      encrypted: True
