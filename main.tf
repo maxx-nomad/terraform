@@ -65,7 +65,7 @@ resource "aws_key_pair" "auth" {
 }
 
 # Create ec2 instance
-resource "aws_instance" "webapp" {
+resource "aws_instance" "default" {
   # use ubuntu 18.04 server ami
   ami = "ami-0bdf93799014acdc4"
   instance_type = "t2.micro"
@@ -73,12 +73,12 @@ resource "aws_instance" "webapp" {
   # The name of our SSH keypair we created above.
   key_name = "${aws_key_pair.auth.id}"
 
-  vpc_security_group_ids = ["${aws_security_group.webapp.id}"]
+  vpc_security_group_ids = ["${aws_security_group.default.id}"]
   subnet_id = "${aws_subnet.default.id}"
 
   # Configure the instance with ansible-playbook
   provisioner "local-exec" {
-    command = "ansible-playbook -u ubuntu --private-key ${var.public_key_path} -i '${aws_instance.webapp.public_ip},' provision.yml"
+    command = "ansible-playbook -u ubuntu --private-key ${var.public_key_path} -i '${aws_instance.default.public_ip},' provision.yml"
   }
 }
 
@@ -87,7 +87,7 @@ resource "aws_db_instance" "default" {
   identifier = "webapp-rds"
   allocated_storage = "10"
   engine = "postgres"
-  engine_version = "10.1-R1"
+  engine_version = "10.4"
   instance_class = "db.t2.micro"
   name = "webappdb"
   username = "webapp_user"
@@ -95,10 +95,13 @@ resource "aws_db_instance" "default" {
 }
 
 # RDS Security Group
-resource "aws_db_security_group" "default" {
+resource "aws_security_group" "rds" {
   name = "webapp_rds_sg"
 
   ingress {
-    cidr = "10.0.1.0/24"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.0/24"]
   }
 }

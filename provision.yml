@@ -1,5 +1,5 @@
 ---
-- hosts: web
+- hosts: all
   name: configuration play
   user: ubuntu
 
@@ -25,9 +25,9 @@
         encoding: UTF-8
 
     - name: Create the user
-    postgresql_user:
-      db: webapp
-      priv: ALL:SELECT,INSERT,UPDATE,DELETE,CONNECT
-      name: webappuser
-      password: secret
-      encrypted: True
+      postgresql_user:
+        db: webapp
+        priv: ALL:SELECT,INSERT,UPDATE,DELETE,CONNECT
+        name: webappuser
+        password: secret
+        encrypted: True
